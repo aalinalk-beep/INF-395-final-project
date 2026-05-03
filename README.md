@@ -91,7 +91,8 @@ discover-kazakhstan/
         ├── utils/
         ├── App.tsx
         └── main.tsx
-        
+```
+
 ## Installation Requirements
 
 Before running the project, install:
@@ -108,37 +109,43 @@ python3 --version
 node --version
 npm --version
 git --version
-
+```
 ---
 
 ## Backend Setup
 
 Open terminal in the project folder:
 
+```bash
 cd discover-kaz-backend
-
+```
 Create and activate virtual environment:
 
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
-
+```
 Install dependencies:
 
+```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-
+```
 Run migrations:
 
+```bash
 python manage.py migrate
-
+```
 Seed database:
 
+```bash
 python manage.py seed_data
-
+```
 Run backend server:
 
+```bash
 python manage.py runserver
-
+```
 Backend runs at:
 
 http://localhost:8000

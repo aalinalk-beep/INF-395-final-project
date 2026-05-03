@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Автоматическая установка проекта Discover Kazakhstan
-Работает на Windows, Linux и Mac
+Automatic installation of the Discover Kazakhstan project
+Works on Windows, Linux and Mac
 """
 
 import os
@@ -10,7 +10,7 @@ import subprocess
 import platform
 from pathlib import Path
 
-# Цвета для терминала
+# Colors for the terminal
 class Colors:
     BLUE = '\033[0;34m'
     GREEN = '\033[0;32m'
@@ -20,34 +20,34 @@ class Colors:
     
     @staticmethod
     def disable_on_windows():
-        """Отключить цвета на Windows (если не поддерживается)"""
+        """Disable colors on Windows (if not supported)"""
         if platform.system() == 'Windows':
             Colors.BLUE = Colors.GREEN = Colors.RED = Colors.YELLOW = Colors.NC = ''
 
 Colors.disable_on_windows()
 
 def print_step(message):
-    """Печать шага установки"""
+    """Print installation step"""
     print(f"\n{Colors.BLUE}{'='*60}{Colors.NC}")
     print(f"{Colors.BLUE}{message}{Colors.NC}")
     print(f"{Colors.BLUE}{'='*60}{Colors.NC}\n")
 
 def print_success(message):
-    """Печать успешного сообщения"""
+    """Print successful message"""
     print(f"{Colors.GREEN} {message}{Colors.NC}")
 
 def print_error(message):
-    """Печать ошибки"""
+    """Print error message"""
     print(f"{Colors.RED}{message}{Colors.NC}")
 
 def print_info(message):
-    """Печать информации"""
+    """Print information"""
     print(f"{Colors.YELLOW}ℹ {message}{Colors.NC}")
 
 def run_command(command, cwd=None, shell=False):
-    """Выполнить команду в терминале"""
+    """Execute command in terminal"""
     try:
-        # На Windows используем shell=True ТОЛЬКО для npm команд
+        # On Windows use shell=True ONLY for npm commands
         if platform.system() == 'Windows' and isinstance(command, list):
             if command[0] == 'npm':
                 shell = True
@@ -74,24 +74,24 @@ def run_command(command, cwd=None, shell=False):
 
 
 def check_requirements():
-    """Проверка установленных требований"""
+    """Check installed requirements"""
     print_step(" Checking requirements...")
     
-    # Проверка Python
+    # Check Python
     python_version = sys.version_info
     if python_version.major < 3 or (python_version.major == 3 and python_version.minor < 8):
         print_error(f"Python 3.8+ required. Current: {python_version.major}.{python_version.minor}")
         return False
     print_success(f"Python {python_version.major}.{python_version.minor}.{python_version.micro}")
     
-    # Проверка pip
+    # Check pip
     success, output = run_command([sys.executable, "-m", "pip", "--version"])
     if not success:
         print_error("pip not found")
         return False
     print_success("pip installed")
     
-    # Проверка Node.js
+    # Check Node.js
     success, output = run_command(["node", "--version"])
     if not success:
         print_error("Node.js not found. Please install Node.js 16+")
@@ -99,7 +99,7 @@ def check_requirements():
     node_version = output.strip()
     print_success(f"Node.js {node_version}")
     
-    # Проверка npm
+    # Check npm
     success, output = run_command(["npm", "--version"])
     if not success:
         print_error("npm not found")
@@ -111,7 +111,7 @@ def check_requirements():
 
 
 def setup_backend():
-    """Установка backend"""
+    """Setup backend"""
     print_step(" Setting up Backend...")
     
     backend_dir = Path("discover-kaz-backend")
@@ -121,7 +121,7 @@ def setup_backend():
     
     venv_path = backend_dir / ".venv"
     
-    # Создание виртуального окружения
+    # Creating a virtual environment
     if not venv_path.exists():
         print_info("Creating virtual environment...")
         success, output = run_command([sys.executable, "-m", "venv", ".venv"], cwd=backend_dir)
@@ -132,13 +132,13 @@ def setup_backend():
     else:
         print_info("Virtual environment already exists")
     
-    # Определение пути к Python в виртуальном окружении
+    # Defining the path to Python in a virtual environment
     if platform.system() == "Windows":
         python_path = venv_path / "Scripts" / "python.exe"
     else:
         python_path = venv_path / "bin" / "python"
     
-    # Установка зависимостей (используем python -m pip вместо прямого вызова pip)
+    # Installing dependencies (using python -m pip instead of direct pip call)
     print_info("Installing Python dependencies...")
     success, output = run_command([str(python_path), "-m", "pip", "install", "-r", "requirements.txt", "-q"], cwd=backend_dir)
     if not success:
@@ -146,7 +146,7 @@ def setup_backend():
         return False
     print_success("Python dependencies installed")
     
-    # Миграции
+    # Running database migrations
     print_info("Running database migrations...")
     success, output = run_command([str(python_path), "manage.py", "migrate"], cwd=backend_dir)
     if not success:
@@ -154,7 +154,7 @@ def setup_backend():
         return False
     print_success("Migrations completed")
     
-    # Загрузка тестовых данных
+    # Loading sample data
     print_info("Loading sample data...")
     success, output = run_command([str(python_path), "manage.py", "seed_data"], cwd=backend_dir)
     if not success:
@@ -162,7 +162,7 @@ def setup_backend():
         return False
     print_success("Sample data loaded (5 destinations + 6 hotels + 3 events)")
     
-    # Создание суперпользователя
+    # Creating a superuser
     print("\n" + "="*60)
     print_info("Now you need to create a superuser for the admin panel")
     print("="*60 + "\n")
@@ -174,7 +174,7 @@ def setup_backend():
 
 
 def setup_frontend():
-    """Установка frontend"""
+    """Setup frontend"""
     print_step(" Setting up Frontend...")
     
     frontend_dir = Path("discover-kaz-frontend")
@@ -182,7 +182,7 @@ def setup_frontend():
         print_error("Frontend directory not found!")
         return False
     
-    # Создание .env файла
+    # Creating .env file
     env_file = frontend_dir / ".env"
     if not env_file.exists():
         print_info("Creating .env file...")
@@ -194,7 +194,7 @@ VITE_MEDIA_URL=http://localhost:8000/media
     else:
         print_info(".env file already exists")
     
-    # Установка зависимостей
+    # Installing dependencies
     print_info("Installing Node.js dependencies (this may take a while)...")
     success, output = run_command(["npm", "install"], cwd=frontend_dir)
     if not success:
@@ -207,7 +207,7 @@ VITE_MEDIA_URL=http://localhost:8000/media
 
 
 def print_final_instructions():
-    """Печать финальных инструкций"""
+    """Print final instructions"""
     print("\n" + "="*60)
     print(f"{Colors.GREEN} Setup completed successfully!{Colors.NC}")
     print("="*60 + "\n")
@@ -235,27 +235,27 @@ def print_final_instructions():
     print("\n" + "="*60 + "\n")
 
 def main():
-    """Главная функция"""
+    """Main function"""
     print(f"\n{Colors.BLUE}{'='*60}{Colors.NC}")
     print(f"{Colors.BLUE} Discover Kazakhstan - Automatic Setup{Colors.NC}")
     print(f"{Colors.BLUE}{'='*60}{Colors.NC}\n")
     
-    # Проверка требований
+    # Check requirements
     if not check_requirements():
         print_error("Requirements check failed. Please install missing dependencies.")
         sys.exit(1)
     
-    # Установка backend
+    # Setup backend
     if not setup_backend():
         print_error("Backend setup failed!")
         sys.exit(1)
     
-    # Установка frontend
+    # Setup frontend
     if not setup_frontend():
         print_error("Frontend setup failed!")
         sys.exit(1)
     
-    # Финальные инструкции
+    # Print final instructions
     print_final_instructions()
 
 if __name__ == "__main__":
